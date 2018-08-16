@@ -24,19 +24,20 @@
 (defn with-user-from [token f] (let [user (valid-user token)] (if user (f user) {:status 404})))
 (defn with-user-id-from [token f] (with-user-from token (comp f :id)))
 
-(def feed-cache (atom [{} ""]))
-(defn feed-page-html [feed-data]
-  (let [[prev-data prev-html] @feed-cache]
-    (if (= prev-data feed-data) prev-html
-      (second (reset! feed-cache [feed-data (html/page (html/newsfeed-html feed-data))])))))
+(def feed-cache (atom [{} (html/page (html/newsfeed-html []))]))
+(defn next-feed-cache
+  [[prev-data prev-html]]
+  (let [feed-state @state/feed-state]
+    (if (= prev-data feed-state)
+      [prev-data prev-html]
+      [feed-state (->> feed-state (vals) (html/newsfeed-html) (html/page))])))
 
 (defroutes page-routes
   (GET "/" [] (send-redirect "/feed"))
 
-  (GET "/feed" [since]
-    (let [feed-state (do (state/finalize-claims!) @state/feed-state)
-          claims (if since (feed/claims-since-id feed-state since) (vals feed-state))]
-      (feed-page-html (mapv #(dissoc % :votes) claims))))
+  (GET "/feed" []
+    (do (state/finalize-claims!)
+        (second (swap! feed-cache next-feed-cache))))
 
   (GET "/profile" [token] (with-user-id-from token (comp send-json state/get-user-profile)))
 
