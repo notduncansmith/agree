@@ -1,1 +1,5 @@
 ./resources/*.db
+.gitignore
+.lein-*
+./target
+./test
