@@ -10,7 +10,7 @@
 
 (def test-user {:username "test-user"})
 (def test-user-2 {:username "test-user-2"})
-(def test-claim {:author-id 1 :text "test-text"})
+(def test-claim {:author-id 1 :text "test text!!"})
 (def test-vote {:user-id 2 :claim-id 1 :direction "up"})
 (def test-score {:id 1 :user-id 1 :latest-scored-claim-id 1 :streak 1 :karma 100})
 (def test-db-path "./resources/test.db")
@@ -51,8 +51,8 @@
   (reset-state!)
   (create-test-data! :user :claim)
   (let [stored (first (db/claims-since (util/hours-ago 1)))]
-    (testing "saves the claim to the db" (is (= (stored :text) "test-text")))
-    (testing "adds the claim to the state" (is (= (get-in @feed-state [1 :text]) "test-text")))))
+    (testing "saves the claim to the db" (is (= (stored :text) "test text!!")))
+    (testing "adds the claim to the state" (is (= (get-in @feed-state [1 :text]) "test text!!")))))
 
 (deftest test-load-claim
   (reset-state!)
@@ -60,7 +60,7 @@
   (reset! feed-state feed/empty-feed-state)
   (load-claim! (first (db/claims-since (util/hours-ago 1))))
   (testing "loads the claim into the feed state"
-    (is (= (get-in @feed-state [1 :text]) "test-text"))))
+    (is (= (get-in @feed-state [1 :text]) "test text!!"))))
 
 (deftest test-add-new-vote
   (reset-state!)

@@ -55,9 +55,8 @@
 
   (POST "/claim" [text token :as req]
     (with-user-id-from token
-      #(let [allowed-text (subs text 0 (min (count text) feed/max-claim-chars))]
-          (println % allowed-text (state/create-claim! {:author-id % :text allowed-text}))
-          (send-redirect "/feed"))))
+      #(do (println (state/create-claim! {:author-id % :text text}))
+           (send-redirect "/feed"))))
 
   (route/not-found "Not Found :("))
 

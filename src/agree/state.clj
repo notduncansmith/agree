@@ -15,11 +15,23 @@
 (defn load-claim! [claim] (swap! feed-state feed/add-claim claim))
 (defn load-vote! [vote] (swap! feed-state feed/add-vote vote))
 
-(defn create-claim! [c] (let [stored (db/create-claim c)] (load-claim! stored) stored))
-(defn create-score! [s] (let [stored (db/create-score s)] (load-score! stored) stored))
-(defn create-vote! [v] (or (feed/vote-error @feed-state v)
-                           (if (-> v (:user-id) (@score-state) (:karma) (= 0)) "Not enough karma")
-                           (let [stored (db/create-vote v)] (load-vote! stored) stored)))
+(defn create-score!
+  "Create a score and return what was stored" ; internally-generated so no error-checking for now
+  [s]
+  (let [stored (db/create-score s)] (load-score! stored) stored))
+
+(defn create-claim!
+  "Create a claim and return what was stored, or an error message if invalid"
+  [c]
+  (or (feed/claim-error c)
+      (let [stored (db/create-claim c)] (load-claim! stored) stored)))
+
+(defn create-vote!
+  "Create a claim and return what was stored, or an error message if invalid"
+  [v]
+  (or (feed/vote-error @feed-state v)
+      (if (-> v (:user-id) (@score-state) (:karma) (= 0)) "Not enough karma")
+      (let [stored (db/create-vote v)] (load-vote! stored) stored)))
 
 (defn create-user! [user]
   (let [token (generate-token)

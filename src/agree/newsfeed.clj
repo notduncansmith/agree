@@ -5,6 +5,7 @@
 
 (def empty-feed-state (sorted-map-by >))
 (def claim-open-hours "Number of hours for which a claim can be voted on" 1)
+(def min-claim-chars "Minimum characters required in claim text" 10)
 (def max-claim-chars "Maximum characters allowed in claim text" 280)
 
 (defn hours-since-created [claim] (-> (:created-at claim) (hours-since)))
@@ -82,3 +83,10 @@
           (not (open-claim? claim)) "Claim is closed"
           (= (claim :author-id) (vote :user-id)) "Cannot vote for own claim"
           true nil)))
+
+(defn claim-error
+  "Returns a string error message, or nil if `claim` is valid"
+  [claim]
+  (cond (< (count (:text claim)) min-claim-chars) "Claim too short"
+        (> (count (:text claim)) max-claim-chars) "Claim too long"
+        true nil))
