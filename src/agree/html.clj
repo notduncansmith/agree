@@ -36,6 +36,7 @@
     [:textarea {:name "text"
                 :placeholder (str "Make a new claim (max " feed/max-claim-chars " characters)")
                 :minlength 10
+                :required true
                 :maxlength feed/max-claim-chars}]
     [:input {:type "hidden" :name "token"}]
     [:input.submit {:type "submit" :value "+ submit"}]])
